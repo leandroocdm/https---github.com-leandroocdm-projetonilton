@@ -17,12 +17,10 @@ def escape_html(text):
         return text
     return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
 
-# Rota para exibir o formulário (GET)
 @app.route('/', methods=['GET'])
 def show_form():
-    return render_template('index.html') # Mudança: Renomeie o seu 'form.html' para 'index.html' se for a página principal.
+    return render_template('index.html')
 
-# Rota para gerar o PDF (POST)
 @app.route('/gerar_pdf', methods=['POST'])
 def gerar_pdf():
     try:
@@ -35,28 +33,24 @@ def gerar_pdf():
 
         # Validate form inputs
         if not nome_cliente or not descricao_servico or not valor_total:
-            logger.error("Campos obrigatórios não preenchidos.")
             return "Por favor, preencha todos os campos obrigatórios.", 400
 
         try:
             valor_total = float(valor_total)
             if valor_total <= 0:
-                logger.error("Valor total inválido: %s", valor_total)
                 return "O valor total deve ser maior que zero.", 400
         except ValueError:
-            logger.error("Valor total não é um número válido: %s", valor_total)
             return "O valor total deve ser um número válido.", 400
 
         # Validate CPF/CNPJ
         if cpf_cnpj:
             cpf_cnpj_clean = re.sub(r'[^\d]', '', cpf_cnpj)
             if not re.match(r'^(\d{11}|\d{14})$', cpf_cnpj_clean):
-                logger.error("CPF/CNPJ inválido: %s", cpf_cnpj)
                 return "Por favor, insira um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.", 400
 
         # Calculate payment options
         valor_a_vista = f"{valor_total:.2f}"
-        taxa_cartao = 0.05  # 5% fee
+        taxa_cartao = 0.05
         valor_cartao = f"{valor_total * (1 + taxa_cartao):.2f}"
 
         # Get current date
@@ -80,19 +74,17 @@ def gerar_pdf():
             HTML(string=html_content, base_url=os.path.dirname(__file__)).write_pdf(pdf_path)
             logger.info("PDF gerado com sucesso: %s", pdf_path)
         except Exception as e:
-            logger.error("Erro ao gerar PDF: %s", str(e))
             return f"Erro ao gerar PDF: {str(e)}", 500
 
         # Send PDF as download
         return send_file(
             pdf_path,
             as_attachment=True,
-            download_name=pdf_path,
+            download_name=os.path.basename(pdf_path),
             mimetype='application/pdf'
         )
 
     except Exception as e:
-        logger.error("Erro geral no processamento do formulário: %s", str(e))
         return f"Erro ao processar o formulário: {str(e)}", 500
 
 if __name__ == '__main__':
