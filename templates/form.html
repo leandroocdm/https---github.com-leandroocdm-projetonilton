@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Orçamento Profissional</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    label { display: block; margin-bottom: 5px; }
+    input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+    button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #45a049; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form method="POST" aria-labelledby="form-title">
+      <h2 id="form-title">Gerador de Orçamento Profissional</h2>
+      <label for="nomeCliente">Nome do Cliente:</label>
+      <input type="text" id="nomeCliente" name="nomeCliente" aria-required="true" required><br><br>
+
+      <label for="cpfCnpjCliente">CPF/CNPJ:</label>
+      <input type="text" id="cpfCnpjCliente" name="cpfCnpjCliente" aria-describedby="cpfCnpjHelp"><br>
+      <small id="cpfCnpjHelp">Insira o CPF (11 dígitos) ou CNPJ (14 dígitos).</small><br><br>
+
+      <label for="descricaoServico">Descrição do Serviço:</label><br>
+      <textarea id="descricaoServico" name="descricaoServico" rows="6" aria-required="true" required></textarea><br><br>
+
+      <label for="observacoes">Observações adicionais:</label><br>
+      <textarea id="observacoes" name="observacoes" rows="4"></textarea><br><br>
+
+      <label for="valorTotal">Valor (R$):</label>
+      <input type="number" id="valorTotal" name="valorTotal" step="0.01" min="0" aria-required="true" required><br><br>
+
+      <button type="submit">Gerar PDF</button>
+    </form>
+  </div>
+</body>
+</html>
