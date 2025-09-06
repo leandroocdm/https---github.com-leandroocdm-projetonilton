@@ -7,153 +7,214 @@
   <link rel="icon" href="static/img/logo.webp">
   <link rel="stylesheet" href="static/styles.css">
   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.6/purify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-
-<script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.2/jspdf.umd.min.js" integrity="sha512-ynqG164ok69tDviynRBS9XrHI3zaicJRV5vDKkT7IUpG4euvBVlXwlbPjGsD2aqaUPESsikaeMKvz7G9PEz3iA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-</script>
-
-  <script>
-    function gerarPdf(){
-      var doc = new jsPDF();
-
-      doc.fromHTML(
-
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Orçamento - Nilton Nascimento Móveis Planejados</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-            .header { display: flex; justify-content: space-between; align-items: center; background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
-            .header-left { display: flex; align-items: center; }
-            .header-left img { width: 192px; height: 192px; border-radius: 50%; margin-right: 10px; }
-            .company-name { font-size: 36px; font-weight: bold; padding: 15px;}
-            .company-details { font-size: 16px; font-weight: 700; padding-left: 15px;}
-            .header-right { text-align: right; }
-            .date { font-size: 14px; }
-            .social-icons { display: flex; justify-content: flex-end; margin-top: 10px; }
-            .social-icons img { width: 60px; height: 60px; margin-left: 50px; }
-            .social-note { font-size: 10px; margin-top: 5px; }
-            .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; text-transform: uppercase; }
-            .client-info { margin-top: 10px; font-size: 14px; }
-            .budget-table { width: 100%; margin-top: 10px; background-color: #f0f0f0; border-radius: 5px; padding: 10px; }
-            .budget-table th { text-align: left; padding-bottom: 5px; border-bottom: 1px solid #ccc; }
-            .budget-table td { padding-top: 5px; }
-            .payment-methods { margin-top: 20px; }
-            .payment-options { display: flex; justify-content: space-between; margin-top: 10px; }
-            .payment-option { width: 45%; }
-            .payment-title { font-weight: bold; }
-            .payment-desc { font-size: 12px; }
-            .payment-value { background-color: #e0e0e0; padding: 5px; margin-top: 5px; text-align: center; font-weight: bold; }
-            .pix-info { text-align: center; margin-top: 20px; font-size: 14px; }
-            .pix-logo { width: 40px; height: 40px; vertical-align: middle; padding: 30px;}
-            .text_pix {font-size: 36px; font-weight: bold; padding: 15px;}
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="header-left">
-              <img src="img/logo.webp" alt="Logo da Empresa" class="logo">
-              <div>
-                <div class="company-name">Nilton Nascimento</div>
-                <div class="company-details">Móveis Planejados</div>
-                <div class="company-details">CNPJ: 13.744.549/0001-32</div>
-                <div class="company-details">Rua Salvador Pratta, n° 460</div>
-                <div class="company-details">(19) 9 8316-1919</div>
-                <div class="company-details">niltonjoiner@hotmail.com</div>
-              </div>
-            </div>
-            <div class="header-right">
-              <div class="date">Data: ${today}<br> Orçamento válido por 7 dias.</div>
-              <div class="social-icons">
-               <a href="https://wa.me/5519983161919"> <img src="img/ic_whatsapp.png" alt="WhatsApp"> </a>
-               <a href="https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y="> <img src="img/ic_instagram.png" alt="Instagram"> </a>
-              </div>
-              <div class="social-note">Toque no icone acima para ser direcionado</div>
-            </div>
-          </div>
-
-          <div class="section-title">Cliente</div>
-          <hr>
-          <div class="client-info">
-            <p><strong>NOME:</strong> ${nomeCliente}</p>
-            <p><strong>CPF/CNPJ:</strong> ${cpfCnpj || "Não informado"}</p>
-          </div>
-
-          <div class="section-title">Orçamento</div>
-          <div class="budget-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Descrição</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><p>${descricaoServico}</p></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="section-title">Observações</div>
-          <div class="client-info">
-            <p>${observacoes || "Nenhuma observação fornecida."}</p>
-          </div>
-
-          <div class="section-title">Formas de Pagamento</div>
-          <hr>
-          <div class="payment-options">
-            <div class="payment-option">
-              <div class="payment-title">À Vista</div>
-              <div class="payment-desc">• Com desconto incluso</div>
-              <div class="payment-value"><strong>R$ ${valorAVista}</strong></div>
-            </div>
-            <div class="payment-option">
-              <div class="payment-title">Cartão</div>
-              <div class="payment-desc">• Com taxa de 5% inclusa</div>
-              <div class="payment-value"><strong>R$ ${valorCartao}</strong></div>
-            </div>
-          </div>
-
-          <div class="pix-info">
-            <p class="text_pix"><img src="img/ic_pix.png" alt="Pix Logo" class="pix-logo">Chave pix: 13.744.549/0001-32</p>
-          </div>
-
-        </body>
-        </html>
-
-      );
-
-      doc.save('Orçamento.pdf');
-    } 
-  </script>
-  
   <div class="container">
-    <form method="post" action="/gerar_pdf" aria-labelledby="form-title">
-      <h2 id="form-title">Gerador de Orçamento Profissional</h2>
-      <label for="nomeCliente">Nome do Cliente:</label>
-      <input type="text" id="nomeCliente" name="nomeCliente" aria-required="true" required><br><br>
+    <h2>Gerador de Orçamento Profissional</h2>
+    <form id="orcamentoForm">
+      <fieldset>
+        <legend>Detalhes do Cliente</legend>
+        <label for="nomeCliente">Nome do Cliente:</label>
+        <input type="text" id="nomeCliente" name="nomeCliente" required><br><br>
+        
+        <label for="cpfCnpjCliente">CPF/CNPJ:</label>
+        <input type="text" id="cpfCnpjCliente" name="cpfCnpjCliente"><br><br>
+      </fieldset>
 
-      <label for="cpfCnpjCliente">CPF/CNPJ:</label>
-      <input type="text" id="cpfCnpjCliente" name="cpfCnpjCliente" aria-describedby="cpfCnpjHelp"><br>
-      <small id="cpfCnpjHelp">Insira o CPF (11 dígitos) ou CNPJ (14 dígitos).</small><br><br>
+      <fieldset>
+        <legend>Detalhes do Serviço</legend>
+        <label for="descricaoServico">Descrição do Serviço:</label><br>
+        <textarea id="descricaoServico" name="descricaoServico" rows="6" required></textarea><br><br>
 
-      <label for="descricaoServico">Descrição do Serviço:</label><br>
-      <textarea id="descricaoServico" name="descricaoServico" rows="6" aria-required="true" required></textarea><br><br>
+        <label for="observacoes">Observações adicionais:</label><br>
+        <textarea id="observacoes" name="observacoes" rows="4"></textarea><br><br>
 
-      <label for="observacoes">Observações adicionais:</label><br>
-      <textarea id="observacoes" name="observacoes" rows="4"></textarea><br><br>
+        <label for="valorTotal">Valor Total (R$):</label>
+        <input type="number" id="valorTotal" name="valorTotal" step="0.01" required><br><br>
+      </fieldset>
 
-      <label for="valorTotal">Valor (R$):</label>
-      <input type="number" id="valorTotal" name="valorTotal" step="0.01" min="0" aria-required="true" required><br><br>
-
-      <button type="submit">Gerar PDF</button>
+      <button type="submit" id="gerarPdfBtn">Gerar PDF</button>
     </form>
   </div>
+  
+  <div id="pdf-template" style="position: absolute; left: -9999px;">
+    </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('orcamentoForm');
+      const gerarPdfBtn = document.getElementById('gerarPdfBtn');
+      const pdfTemplateElement = document.getElementById('pdf-template');
+
+      const PIX_DISCOUNT_RATE = 0.05;
+      const CARD_MARKUP_RATE = 0.05;
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        gerarPdfBtn.disabled = true;
+        gerarPdfBtn.textContent = 'Gerando PDF...';
+
+        try {
+          const { jsPDF } = window.jspdf;
+
+          const nomeCliente = document.getElementById('nomeCliente').value;
+          const cpfCnpj = document.getElementById('cpfCnpjCliente').value || 'Não informado';
+          const descricaoServico = document.getElementById('descricaoServico').value;
+          const observacoes = document.getElementById('observacoes').value || 'Nenhuma observação fornecida.';
+          
+          let valorTotal = parseFloat(document.getElementById('valorTotal').value);
+          if (isNaN(valorTotal)) {
+            throw new Error('Valor inválido. Por favor, insira um número.');
+          }
+          valorTotal = valorTotal.toFixed(2);
+          
+          const valorAVista = (valorTotal * (1 - PIX_DISCOUNT_RATE)).toFixed(2);
+          const valorCartao = (valorTotal * (1 + CARD_MARKUP_RATE)).toFixed(2);
+          const today = new Date().toLocaleDateString('pt-BR');
+
+          // Preenche o template HTML com os dados
+          pdfTemplateElement.innerHTML = `
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+              .header { display: flex; justify-content: space-between; align-items: center; background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
+              .header-left { display: flex; align-items: center; }
+              .header-left img { width: 192px; height: 192px; border-radius: 50%; margin-right: 10px; }
+              .company-name { font-size: 36px; font-weight: bold; padding: 15px;}
+              .company-details { font-size: 16px; font-weight: 700; padding-left: 15px;}
+              .header-right { text-align: right; }
+              .date { font-size: 14px; }
+              .social-icons { display: flex; justify-content: flex-end; margin-top: 10px; }
+              .social-icons img { width: 60px; height: 60px; margin-left: 50px; }
+              .social-note { font-size: 10px; margin-top: 5px; }
+              .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; text-transform: uppercase; }
+              .client-info { margin-top: 10px; font-size: 14px; }
+              .budget-table { width: 100%; margin-top: 10px; background-color: #f0f0f0; border-radius: 5px; padding: 10px; }
+              .budget-table th { text-align: left; padding-bottom: 5px; border-bottom: 1px solid #ccc; }
+              .budget-table td { padding-top: 5px; }
+              .payment-methods { margin-top: 20px; }
+              .payment-options { display: flex; justify-content: space-between; margin-top: 10px; }
+              .payment-option { width: 45%; }
+              .payment-title { font-weight: bold; }
+              .payment-desc { font-size: 12px; }
+              .payment-value { background-color: #e0e0e0; padding: 5px; margin-top: 5px; text-align: center; font-weight: bold; }
+              .pix-info { text-align: center; margin-top: 20px; font-size: 14px; }
+              .pix-logo { width: 40px; height: 40px; vertical-align: middle; padding: 30px;}
+              .text_pix {font-size: 36px; font-weight: bold; padding: 15px;}
+            </style>
+            <body>
+              <div class="header">
+                <div class="header-left">
+                  <img src="img/logo.webp" alt="Logo da Empresa" class="logo">
+                  <div>
+                    <div class="company-name">Nilton Nascimento</div>
+                    <div class="company-details">Móveis Planejados</div>
+                    <div class="company-details">CNPJ: 13.744.549/0001-32</div>
+                    <div class="company-details">Rua Salvador Pratta, n° 460</div>
+                    <div class="company-details">(19) 9 8316-1919</div>
+                    <div class="company-details">niltonjoiner@hotmail.com</div>
+                  </div>
+                </div>
+                <div class="header-right">
+                  <div class="date">Data: ${today}<br> Orçamento válido por 7 dias.</div>
+                  <div class="social-icons">
+                   <a href="https://wa.me/5519983161919"> <img src="img/ic_whatsapp.png" alt="WhatsApp"> </a>
+                   <a href="https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y="> <img src="img/ic_instagram.png" alt="Instagram"> </a>
+                  </div>
+                  <div class="social-note">Toque no icone acima para ser direcionado</div>
+                </div>
+              </div>
+
+              <div class="section-title">Cliente</div>
+              <hr>
+              <div class="client-info">
+                <p><strong>NOME:</strong> ${nomeCliente}</p>
+                <p><strong>CPF/CNPJ:</strong> ${cpfCnpj}</p>
+              </div>
+
+              <div class="section-title">Orçamento</div>
+              <div class="budget-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Descrição</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><p>${descricaoServico}</p></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="section-title">Observações</div>
+              <div class="client-info">
+                <p>${observacoes}</p>
+              </div>
+
+              <div class="section-title">Formas de Pagamento</div>
+              <hr>
+              <div class="payment-options">
+                <div class="payment-option">
+                  <div class="payment-title">À Vista</div>
+                  <div class="payment-desc">• Com desconto incluso</div>
+                  <div class="payment-value"><strong>R$ ${valorAVista}</strong></div>
+                </div>
+                <div class="payment-option">
+                  <div class="payment-title">Cartão</div>
+                  <div class="payment-desc">• Com taxa de 5% inclusa</div>
+                  <div class="payment-value"><strong>R$ ${valorCartao}</strong></div>
+                </div>
+              </div>
+
+              <div class="pix-info">
+                <p class="text_pix"><img src="img/ic_pix.png" alt="Pix Logo" class="pix-logo">Chave pix: 13.744.549/0001-32</p>
+              </div>
+            </body>
+            </html>
+          `;
+
+          // 1. Renderizar o elemento HTML em um canvas
+          const canvas = await html2canvas(pdfTemplateElement, { scale: 2 }); 
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          
+          // 2. Criar um documento jsPDF
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const imgWidth = 210; 
+          const pageHeight = 297; 
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          let heightLeft = imgHeight;
+          let position = 0;
+
+          // 3. Adicionar a imagem do canvas ao PDF
+          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+
+          // Se o conteúdo for maior que uma página, adicione novas páginas
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+          }
+
+          // 4. Salvar o documento
+          pdf.save('Orçamento.pdf');
+
+          alert('PDF gerado com sucesso!');
+        } catch (error) {
+          alert('Erro ao gerar o PDF: ' + error.message);
+          console.error('Erro ao gerar o PDF:', error);
+        } finally {
+          gerarPdfBtn.disabled = false;
+          gerarPdfBtn.textContent = 'Gerar PDF';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
