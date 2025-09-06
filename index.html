@@ -50,7 +50,7 @@
       const pdfTemplateElement = document.getElementById('pdf-template');
 
       const PIX_DISCOUNT_RATE = 0.05;
-      const CARD_MARKUP_RATE = 0.05;
+      const CARD_MARKUP_RATE = 0.10;
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -98,8 +98,8 @@
               .payment-methods { margin-top: 20px; }
               .payment-options { display: flex; justify-content: space-between; margin-top: 10px; }
               .payment-option { width: 45%; }
-              .payment-title { font-weight: bold; }
-              .payment-desc { font-size: 12px; }
+              .payment-title { font-weight: bold; text-align: center; padding: 5px; }
+              .payment-desc { font-size: 12px; text-align: center; }
               .payment-value { background-color: #e0e0e0; padding: 5px; margin-top: 5px; text-align: center; font-weight: bold; }
               .pix-info { text-align: center; margin-top: 20px; font-size: 14px; }
               .pix-logo { width: 40px; height: 40px; vertical-align: middle; padding: 30px;}
@@ -163,12 +163,17 @@
                   <div class="payment-title">À Vista</div>
                   <div class="payment-desc">• Com desconto incluso</div>
                   <div class="payment-value"><strong>R$ ${valorAVista}</strong></div>
+                <div class="payment-option">
+                  <div class="payment-title">Entrada+Restante</div>
+                  <div class="payment-desc">• 50% de entrada + 50% na entrega</div>
+                  <div class="payment-value"><strong>R$ ${valorTotal}</strong></div>
                 </div>
                 <div class="payment-option">
                   <div class="payment-title">Cartão</div>
-                  <div class="payment-desc">• Com taxa de 5% inclusa</div>
+                  <div class="payment-desc">• Com taxa a incluir e em até 12x</div>
                   <div class="payment-value"><strong>R$ ${valorCartao}</strong></div>
                 </div>
+
               </div>
 
               <div class="pix-info">
