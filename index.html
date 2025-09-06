@@ -9,6 +9,130 @@
   
 </head>
 <body>
+
+<script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.2/jspdf.umd.min.js" integrity="sha512-ynqG164ok69tDviynRBS9XrHI3zaicJRV5vDKkT7IUpG4euvBVlXwlbPjGsD2aqaUPESsikaeMKvz7G9PEz3iA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</script>
+
+  <script>
+    function gerarPdf(){
+      var doc = new jsPDF();
+
+      doc.fromHTML(
+
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Orçamento - Nilton Nascimento Móveis Planejados</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+            .header { display: flex; justify-content: space-between; align-items: center; background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
+            .header-left { display: flex; align-items: center; }
+            .header-left img { width: 192px; height: 192px; border-radius: 50%; margin-right: 10px; }
+            .company-name { font-size: 36px; font-weight: bold; padding: 15px;}
+            .company-details { font-size: 16px; font-weight: 700; padding-left: 15px;}
+            .header-right { text-align: right; }
+            .date { font-size: 14px; }
+            .social-icons { display: flex; justify-content: flex-end; margin-top: 10px; }
+            .social-icons img { width: 60px; height: 60px; margin-left: 50px; }
+            .social-note { font-size: 10px; margin-top: 5px; }
+            .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; text-transform: uppercase; }
+            .client-info { margin-top: 10px; font-size: 14px; }
+            .budget-table { width: 100%; margin-top: 10px; background-color: #f0f0f0; border-radius: 5px; padding: 10px; }
+            .budget-table th { text-align: left; padding-bottom: 5px; border-bottom: 1px solid #ccc; }
+            .budget-table td { padding-top: 5px; }
+            .payment-methods { margin-top: 20px; }
+            .payment-options { display: flex; justify-content: space-between; margin-top: 10px; }
+            .payment-option { width: 45%; }
+            .payment-title { font-weight: bold; }
+            .payment-desc { font-size: 12px; }
+            .payment-value { background-color: #e0e0e0; padding: 5px; margin-top: 5px; text-align: center; font-weight: bold; }
+            .pix-info { text-align: center; margin-top: 20px; font-size: 14px; }
+            .pix-logo { width: 40px; height: 40px; vertical-align: middle; padding: 30px;}
+            .text_pix {font-size: 36px; font-weight: bold; padding: 15px;}
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="header-left">
+              <img src="img/logo.webp" alt="Logo da Empresa" class="logo">
+              <div>
+                <div class="company-name">Nilton Nascimento</div>
+                <div class="company-details">Móveis Planejados</div>
+                <div class="company-details">CNPJ: 13.744.549/0001-32</div>
+                <div class="company-details">Rua Salvador Pratta, n° 460</div>
+                <div class="company-details">(19) 9 8316-1919</div>
+                <div class="company-details">niltonjoiner@hotmail.com</div>
+              </div>
+            </div>
+            <div class="header-right">
+              <div class="date">Data: ${today}<br> Orçamento válido por 7 dias.</div>
+              <div class="social-icons">
+               <a href="https://wa.me/5519983161919"> <img src="img/ic_whatsapp.png" alt="WhatsApp"> </a>
+               <a href="https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y="> <img src="img/ic_instagram.png" alt="Instagram"> </a>
+              </div>
+              <div class="social-note">Toque no icone acima para ser direcionado</div>
+            </div>
+          </div>
+
+          <div class="section-title">Cliente</div>
+          <hr>
+          <div class="client-info">
+            <p><strong>NOME:</strong> ${nomeCliente}</p>
+            <p><strong>CPF/CNPJ:</strong> ${cpfCnpj || "Não informado"}</p>
+          </div>
+
+          <div class="section-title">Orçamento</div>
+          <div class="budget-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><p>${descricaoServico}</p></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-title">Observações</div>
+          <div class="client-info">
+            <p>${observacoes || "Nenhuma observação fornecida."}</p>
+          </div>
+
+          <div class="section-title">Formas de Pagamento</div>
+          <hr>
+          <div class="payment-options">
+            <div class="payment-option">
+              <div class="payment-title">À Vista</div>
+              <div class="payment-desc">• Com desconto incluso</div>
+              <div class="payment-value"><strong>R$ ${valorAVista}</strong></div>
+            </div>
+            <div class="payment-option">
+              <div class="payment-title">Cartão</div>
+              <div class="payment-desc">• Com taxa de 5% inclusa</div>
+              <div class="payment-value"><strong>R$ ${valorCartao}</strong></div>
+            </div>
+          </div>
+
+          <div class="pix-info">
+            <p class="text_pix"><img src="img/ic_pix.png" alt="Pix Logo" class="pix-logo">Chave pix: 13.744.549/0001-32</p>
+          </div>
+
+        </body>
+        </html>
+
+      );
+
+      doc.save('Orçamento.pdf');
+    } 
+  </script>
+  
   <div class="container">
     <form method="post" action="/gerar_pdf" aria-labelledby="form-title">
       <h2 id="form-title">Gerador de Orçamento Profissional</h2>
