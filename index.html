@@ -85,6 +85,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resultado != digitos.charAt(1)) return false;
     return true;
   }
+  
+  // Formatar CPF
+function formatarCPF(cpf) {
+  cpf = cpf.replace(/\D/g, ''); // remove tudo que não é número
+  if (cpf.length !== 11) return cpf;
+  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
+
+// Formatar CNPJ
+function formatarCNPJ(cnpj) {
+  cnpj = cnpj.replace(/\D/g, '');
+  if (cnpj.length !== 14) return cnpj;
+  return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+}
 
   // Evento de submit do form
   form.addEventListener('submit', async (event) => {
@@ -104,6 +118,18 @@ document.addEventListener('DOMContentLoaded', () => {
       alert("CPF ou CNPJ inválido. Corrija antes de gerar o PDF.");
       return;
     }
+
+
+    // Formatar CPF ou CNPJ
+let cpfCnpjFormatado;
+if (somenteNumeros.length === 11) {
+  cpfCnpjFormatado = formatarCPF(somenteNumeros);
+} else if (somenteNumeros.length === 14) {
+  cpfCnpjFormatado = formatarCNPJ(somenteNumeros);
+} else {
+  cpfCnpjFormatado = valor; // caso não seja válido, mantém original
+}
+
 
     gerarPdfBtn.disabled = true;
     gerarPdfBtn.textContent = 'Gerando PDF...';
@@ -177,7 +203,7 @@ pdfTemplateElement.innerHTML = `
               <hr>
               <div class="client-info">
                 <p><strong>NOME:</strong> ${nomeCliente}</p>
-                <p><strong>CPF/CNPJ:</strong> ${cpfCnpj}</p>
+                <p><strong>CPF/CNPJ:</strong> ${cpfCnpjFormatado}</p>
               </div>
 
               <div class="section-title">Orçamento</div>
