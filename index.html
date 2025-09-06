@@ -1,180 +1,277 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de Orçamento Profissional</title>
-  <link rel="icon" href="static/img/logo.webp">
-  <link rel="stylesheet" href="static/styles.css">
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.6/purify.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Orçamento Profissional</title>
+    <link rel="icon" href="static/img/logo.webp">
+    <link rel="stylesheet" href="static/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.6/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
-  <div class="container">
-    <h2>Gerador de Orçamento Profissional</h2>
-    <form id="orcamentoForm">
-      <fieldset>
-        <legend>Detalhes do Cliente</legend>
-        <label for="nomeCliente">Nome do Cliente:</label>
-        <input type="text" id="nomeCliente" name="nomeCliente" required><br><br>
-        
-        <label for="cpfCnpjCliente">CPF/CNPJ:</label>
-        <input type="text" id="cpfCnpjCliente" name="cpfCnpjCliente" maxlength="18" required><br><br>
-      </fieldset>
+    <div class="container">
+        <h2>Gerador de Orçamento Profissional</h2>
+        <form id="orcamentoForm">
+            <fieldset>
+                <legend>Detalhes do Cliente</legend> <label for="nomeCliente">Nome do Cliente:</label> <input
+                    type="text" id="nomeCliente" name="nomeCliente" required><br><br> <label
+                    for="cpfCnpjCliente">CPF/CNPJ:</label> <input type="text" id="cpfCnpjCliente" name="cpfCnpjCliente"
+                    maxlength="18" required><br><br>
+            </fieldset>
+            <fieldset>
+                <legend>Detalhes do Serviço</legend> <label for="descricaoServico">Descrição do Serviço:</label><br>
+                <textarea id="descricaoServico" name="descricaoServico" rows="6" required></textarea><br><br> <label
+                    for="observacoes">Observações adicionais:</label><br> <textarea id="observacoes" name="observacoes"
+                    rows="4"></textarea><br><br> <label for="valorTotal">Valor Total (R$):</label> <input type="number"
+                    id="valorTotal" name="valorTotal" step="0.01" required><br><br>
+            </fieldset> <button type="submit" id="gerarPdfBtn">Gerar PDF</button>
+        </form>
+    </div>
+    <div id="pdf-template" style="position: absolute; left: -9999px;"> </div>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('orcamentoForm');
+  const gerarPdfBtn = document.getElementById('gerarPdfBtn');
+  const pdfTemplateElement = document.getElementById('pdf-template');
+  const PIX_DISCOUNT_RATE = 0.05;
+  const CARD_MARKUP_RATE = 0.10;
 
-      <fieldset>
-        <legend>Detalhes do Serviço</legend>
-        <label for="descricaoServico">Descrição do Serviço:</label><br>
-        <textarea id="descricaoServico" name="descricaoServico" rows="6" required></textarea><br><br>
+  // Função de validação CPF
+  function validarCPF(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let soma = 0, resto;
+    for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.substring(9, 10))) return false;
+    soma = 0;
+    for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.substring(10, 11))) return false;
+    return true;
+  }
 
-        <label for="observacoes">Observações adicionais:</label><br>
-        <textarea id="observacoes" name="observacoes" rows="4"></textarea><br><br>
+  // Função de validação CNPJ
+  function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/[^\d]+/g, '');
+    if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+    let tamanho = cnpj.length - 2;
+    let numeros = cnpj.substring(0, tamanho);
+    let digitos = cnpj.substring(tamanho);
+    let soma = 0;
+    let pos = tamanho - 7;
+    for (let i = tamanho; i >= 1; i--) {
+      soma += numeros.charAt(tamanho - i) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+    if (resultado != digitos.charAt(0)) return false;
+    tamanho = tamanho + 1;
+    numeros = cnpj.substring(0, tamanho);
+    soma = 0;
+    pos = tamanho - 7;
+    for (let i = tamanho; i >= 1; i--) {
+      soma += numeros.charAt(tamanho - i) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+    if (resultado != digitos.charAt(1)) return false;
+    return true;
+  }
 
-        <label for="valorTotal">Valor Total (R$):</label>
-        <input type="number" id="valorTotal" name="valorTotal" step="0.01" required><br><br>
-      </fieldset>
+  // Evento de submit do form
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-      <button type="submit" id="gerarPdfBtn">Gerar PDF</button>
-    </form>
-  </div>
-  
-  <div id="pdf-template" style="position: absolute; left: -9999px;"></div>
+    const valor = document.getElementById("cpfCnpjCliente").value;
+    const somenteNumeros = valor.replace(/\D/g, '');
+    let valido = false;
 
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('orcamentoForm');
-    const gerarPdfBtn = document.getElementById('gerarPdfBtn');
-    const pdfTemplateElement = document.getElementById('pdf-template');
-
-    const PIX_DISCOUNT_RATE = 0.05;
-    const CARD_MARKUP_RATE = 0.10;
-
-    // ---- Validação CPF ----
-    function validarCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g, '');
-      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-      let soma = 0, resto;
-      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.substring(9, 10))) return false;
-      soma = 0;
-      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.substring(10, 11))) return false;
-      return true;
+    if (somenteNumeros.length === 11) {
+      valido = validarCPF(valor);
+    } else if (somenteNumeros.length === 14) {
+      valido = validarCNPJ(valor);
     }
 
-    // ---- Validação CNPJ ----
-    function validarCNPJ(cnpj) {
-      cnpj = cnpj.replace(/[^\d]+/g, '');
-      if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
-      let tamanho = cnpj.length - 2;
-      let numeros = cnpj.substring(0, tamanho);
-      let digitos = cnpj.substring(tamanho);
-      let soma = 0;
-      let pos = tamanho - 7;
-      for (let i = tamanho; i >= 1; i--) {
-        soma += numeros.charAt(tamanho - i) * pos--;
-        if (pos < 2) pos = 9;
-      }
-      let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-      if (resultado != digitos.charAt(0)) return false;
-      tamanho++;
-      numeros = cnpj.substring(0, tamanho);
-      soma = 0;
-      pos = tamanho - 7;
-      for (let i = tamanho; i >= 1; i--) {
-        soma += numeros.charAt(tamanho - i) * pos--;
-        if (pos < 2) pos = 9;
-      }
-      resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-      if (resultado != digitos.charAt(1)) return false;
-      return true;
+    if (!valido) {
+      alert("CPF ou CNPJ inválido. Corrija antes de gerar o PDF.");
+      return;
     }
 
-    // ---- SUBMIT ----
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+    gerarPdfBtn.disabled = true;
+    gerarPdfBtn.textContent = 'Gerando PDF...';
 
-      const valor = document.getElementById("cpfCnpjCliente").value;
-      const somenteNumeros = valor.replace(/\D/g, '');
-      let valido = false;
-      if (somenteNumeros.length === 11) valido = validarCPF(valor);
-      else if (somenteNumeros.length === 14) valido = validarCNPJ(valor);
+    try {
+      const { jsPDF } = window.jspdf;
+      const nomeCliente = document.getElementById('nomeCliente').value;
+      const cpfCnpj = document.getElementById('cpfCnpjCliente').value || 'Não informado';
+      const descricaoServico = document.getElementById('descricaoServico').value;
+      const observacoes = document.getElementById('observacoes').value || 'Nenhuma observação fornecida.';
+      let valorTotal = parseFloat(document.getElementById('valorTotal').value);
+      if (isNaN(valorTotal)) throw new Error('Valor inválido. Por favor, insira um número.');
+      valorTotal = valorTotal.toFixed(2);
 
-      if (!valido) {
-        alert("CPF ou CNPJ inválido. Corrija antes de gerar o PDF.");
-        return;
+      const valorAVista = (valorTotal * (1 - PIX_DISCOUNT_RATE)).toFixed(2);
+      const valorCartao = (valorTotal * (1 + CARD_MARKUP_RATE)).toFixed(2);
+      const today = new Date().toLocaleDateString('pt-BR');
+
+pdfTemplateElement.innerHTML = `
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+              .header { display: flex; justify-content: space-between; align-items: center; background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
+              .header-left { display: flex; align-items: center; }
+              .header-left img { width: 192px; height: 192px; border-radius: 50%; margin-right: 10px; }
+              .company-name { font-size: 36px; font-weight: bold; padding: 15px;}
+              .company-details { font-size: 16px; font-weight: 700; padding-left: 15px;}
+              .header-right { text-align: right; }
+              .date { font-size: 14px; }
+              .social-icons { display: flex; justify-content: flex-end; margin-top: 10px; }
+              .social-icons img { width: 60px; height: 60px; margin-left: 50px; }
+              .social-note { font-size: 10px; margin-top: 5px; }
+              .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; text-transform: uppercase; }
+              .client-info { margin-top: 10px; font-size: 14px; }
+              .budget-table { width: 100%; margin-top: 10px; background-color: #f0f0f0; border-radius: 5px; padding: 10px; }
+              .budget-table th { text-align: left; padding-bottom: 5px; border-bottom: 1px solid #ccc; }
+              .budget-table td { padding-top: 5px; }
+              .payment-methods { margin-top: 20px; }
+              .payment-options { display: flex; justify-content: space-between; margin-top: 10px; }
+              .payment-option { width: 45%; }
+              .payment-title { font-weight: bold; text-align: center; padding: 5px; }
+              .payment-desc { font-size: 12px; text-align: center; }
+              .payment-value { background-color: #e0e0e0; padding: 5px; margin-top: 5px; text-align: center; font-weight: bold; }
+              .pix-info { text-align: center; margin-top: 20px; font-size: 14px; }
+              .pix-logo { width: 40px; height: 40px; vertical-align: middle; padding: 30px;}
+              .text_pix {font-size: 36px; font-weight: bold; padding: 15px;}
+            </style>
+            <body>
+              <div class="header">
+                <div class="header-left">
+                  <img src="static/img/logo.webp" alt="Logo da Empresa" class="logo">
+                  <div>
+                    <div class="company-name">Nilton Nascimento</div>
+                    <div class="company-details">Móveis Planejados</div>
+                    <div class="company-details">CNPJ: 13.744.549/0001-32</div>
+                    <div class="company-details">Rua Salvador Pratta, n° 460</div>
+                    <div class="company-details">(19) 9 8316-1919</div>
+                    <div class="company-details">niltonjoiner@hotmail.com</div>
+                  </div>
+                </div>
+                <div class="header-right">
+                  <div class="date">Data: ${today}<br> Orçamento válido por 7 dias.</div>
+                  <div class="social-icons">
+                   <a href="https://wa.me/5519983161919"> <img src="static/img/ic_whatsapp.png" alt="WhatsApp"> </a>
+                   <a href="https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y="> <img src="static/img/ic_instagram.png" alt="Instagram"> </a>
+                  </div>
+                  <div class="social-note">Toque no icone acima para ser direcionado</div>
+                </div>
+              </div>
+
+              <div class="section-title">Cliente</div>
+              <hr>
+              <div class="client-info">
+                <p><strong>NOME:</strong> ${nomeCliente}</p>
+                <p><strong>CPF/CNPJ:</strong> ${cpfCnpj}</p>
+              </div>
+
+              <div class="section-title">Orçamento</div>
+              <div class="budget-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Descrição</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><p>${descricaoServico}</p></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="section-title">Observações</div>
+              <div class="client-info">
+                <p>${observacoes}</p>
+              </div>
+
+              <div class="section-title">Formas de Pagamento</div>
+              <hr>
+              <div class="payment-options">
+                <div class="payment-option">
+                  <div class="payment-title">À Vista</div>
+                  <div class="payment-desc">• Com desconto incluso</div>
+                  <div class="payment-value"><strong>R$ ${valorAVista}</strong></div>
+                </div>
+
+		    	<div class="payment-option">
+                  <div class="payment-title">Entrada+Restante</div>
+                  <div class="payment-desc">• 50% de entrada + 50% na entrega</div>
+                  <div class="payment-value"><strong>R$ ${valorTotal}</strong></div>
+                </div>
+				
+                <div class="payment-option">
+                  <div class="payment-title">Cartão</div>
+                  <div class="payment-desc">• Com taxa a incluir e em até 12x</div>
+                  <div class="payment-value"><strong>R$ ${valorCartao}</strong></div>
+                </div>
+              </div>
+              <div class="pix-info">
+                <p class="text_pix"><img src="static/img/ic_pix.png" alt="Pix Logo" class="pix-logo">Chave pix: 13.744.549/0001-32</p>
+              </div>
+            </body>
+            </html>
+          `;
+
+      // renderiza o PDF
+      const MARGIN = 5;
+      const A4_WIDTH_MM = 210;
+      const A4_HEIGHT_MM = 297;
+      const contentWidthMm = A4_WIDTH_MM - (2 * MARGIN);
+      const contentHeightMm = A4_HEIGHT_MM - (2 * MARGIN);
+
+      const canvas = await html2canvas(pdfTemplateElement, { scale: 3 });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+      const imgAspectRatio = canvas.width / canvas.height;
+      let imgHeightCalculated = contentWidthMm / imgAspectRatio;
+      let imgWidthCalculated = contentWidthMm;
+
+      if (imgHeightCalculated > contentHeightMm) {
+        imgHeightCalculated = contentHeightMm;
+        imgWidthCalculated = contentHeightMm * imgAspectRatio;
       }
 
-      gerarPdfBtn.disabled = true;
-      gerarPdfBtn.textContent = 'Gerando PDF...';
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const xPos = MARGIN + (contentWidthMm - imgWidthCalculated) / 2;
+      const yPos = MARGIN;
 
-      try {
-        const { jsPDF } = window.jspdf;
+      pdf.addImage(imgData, 'JPEG', xPos, yPos, imgWidthCalculated, imgHeightCalculated);
 
-        const nomeCliente = document.getElementById('nomeCliente').value;
-        const cpfCnpj = document.getElementById('cpfCnpjCliente').value || 'Não informado';
-        const descricaoServico = document.getElementById('descricaoServico').value;
-        const observacoes = document.getElementById('observacoes').value || 'Nenhuma observação fornecida.';
-        
-        let valorTotal = parseFloat(document.getElementById('valorTotal').value);
-        if (isNaN(valorTotal)) throw new Error('Valor inválido. Por favor, insira um número.');
-        valorTotal = valorTotal.toFixed(2);
+      // Links clicáveis
+      pdf.link(xPos + imgWidthCalculated - 48, yPos + 20, 20, 20, { url: 'https://wa.me/5519983161919' });
+      pdf.link(xPos + imgWidthCalculated - 24, yPos + 20, 20, 20, { url: 'https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y=' });
 
-        const valorAVista = (valorTotal * (1 - PIX_DISCOUNT_RATE)).toFixed(2);
-        const valorCartao = (valorTotal * (1 + CARD_MARKUP_RATE)).toFixed(2);
-        const today = new Date().toLocaleDateString('pt-BR');
-
-        // ---- Monta o template do PDF ----
-        pdfTemplateElement.innerHTML = `
-          <!-- SEU TEMPLATE HTML COMPLETO AQUI (mesmo que já montou antes) -->
-        `;
-
-        // ---- Renderiza para PDF ----
-        const MARGIN = 5; 
-        const A4_WIDTH_MM = 210;
-        const A4_HEIGHT_MM = 297;
-        const contentWidthMm = A4_WIDTH_MM - (2 * MARGIN);
-        const contentHeightMm = A4_HEIGHT_MM - (2 * MARGIN);
-
-        const canvas = await html2canvas(pdfTemplateElement, { scale: 3 });
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-
-        const imgAspectRatio = canvas.width / canvas.height;
-        let imgHeightCalculated = contentWidthMm / imgAspectRatio;
-        let imgWidthCalculated = contentWidthMm;
-        if (imgHeightCalculated > contentHeightMm) {
-          imgHeightCalculated = contentHeightMm;
-          imgWidthCalculated = contentHeightMm * imgAspectRatio;
-        }
-
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const xPos = MARGIN + (contentWidthMm - imgWidthCalculated) / 2;
-        const yPos = MARGIN;
-        pdf.addImage(imgData, 'JPEG', xPos, yPos, imgWidthCalculated, imgHeightCalculated);
-
-        // Links clicáveis
-        pdf.link(xPos + imgWidthCalculated - 50, yPos + 20, 20, 20, { url: 'https://wa.me/5519983161919' });
-        pdf.link(xPos + imgWidthCalculated - 25, yPos + 20, 20, 20, { url: 'https://instagram.com/moveis_planejados_nascimento' });
-
-        pdf.save('Orçamento.pdf');
-        alert('PDF gerado com sucesso!');
-
-      } catch (error) {
-        alert('Erro ao gerar o PDF: ' + error.message);
-        console.error('Erro ao gerar o PDF:', error);
-      } finally {
-        pdfTemplateElement.innerHTML = '';
-        gerarPdfBtn.disabled = false;
-        gerarPdfBtn.textContent = 'Gerar PDF';
-      }
-    });
+      pdf.save('Orçamento.pdf');
+      alert('PDF gerado com sucesso!');
+    } catch (error) {
+      alert('Erro ao gerar o PDF: ' + error.message);
+      console.error('Erro ao gerar o PDF:', error);
+    } finally {
+      pdfTemplateElement.innerHTML = '';
+      gerarPdfBtn.disabled = false;
+      gerarPdfBtn.textContent = 'Gerar PDF';
+    }
   });
-  </script>
+});
+</script>
+
 </body>
+
 </html>
