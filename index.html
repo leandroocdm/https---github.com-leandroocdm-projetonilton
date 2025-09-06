@@ -46,15 +46,62 @@
     </div>
 
   <script>
-document.addEventListener('DOMContentLoaded', () => {
+
+
+	  document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('orcamentoForm');
   const gerarPdfBtn = document.getElementById('gerarPdfBtn');
   const pdfTemplateElement = document.getElementById('pdf-template');
 
-  // funções de validação (CPF/CNPJ) ficam aqui em cima
-  function validarCPF(cpf) { ... }
-  function validarCNPJ(cnpj) { ... }
+  const PIX_DISCOUNT_RATE = 0.05;
+  const CARD_MARKUP_RATE = 0.10;
 
+  // Função de validação CPF
+  function validarCPF(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let soma = 0, resto;
+    for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.substring(9, 10))) return false;
+    soma = 0;
+    for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.substring(10, 11))) return false;
+    return true;
+  }
+
+  // Função de validação CNPJ
+  function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/[^\d]+/g, '');
+    if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+    let tamanho = cnpj.length - 2;
+    let numeros = cnpj.substring(0, tamanho);
+    let digitos = cnpj.substring(tamanho);
+    let soma = 0;
+    let pos = tamanho - 7;
+    for (let i = tamanho; i >= 1; i--) {
+      soma += numeros.charAt(tamanho - i) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+    if (resultado != digitos.charAt(0)) return false;
+    tamanho = tamanho + 1;
+    numeros = cnpj.substring(0, tamanho);
+    soma = 0;
+    pos = tamanho - 7;
+    for (let i = tamanho; i >= 1; i--) {
+      soma += numeros.charAt(tamanho - i) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+    if (resultado != digitos.charAt(1)) return false;
+    return true;
+  }
+
+  // ÚNICO submit
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -79,23 +126,24 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const { jsPDF } = window.jspdf;
 
-      // >>> daqui pra baixo entra todo o código que gera o PDF
-      // usando pdfTemplateElement.innerHTML, html2canvas e jsPDF
+      const nomeCliente = document.getElementById('nomeCliente').value;
+      const cpfCnpj = document.getElementById('cpfCnpjCliente').value || 'Não informado';
+      const descricaoServico = document.getElementById('descricaoServico').value;
+      const observacoes = document.getElementById('observacoes').value || 'Nenhuma observação fornecida.';
+      
+      let valorTotal = parseFloat(document.getElementById('valorTotal').value);
+      if (isNaN(valorTotal)) throw new Error('Valor inválido. Por favor, insira um número.');
+      valorTotal = valorTotal.toFixed(2);
 
-      pdf.save('Orçamento.pdf');
-      alert('PDF gerado com sucesso!');
-    } catch (error) {
-      alert('Erro ao gerar o PDF: ' + error.message);
-      console.error(error);
-    } finally {
-      pdfTemplateElement.innerHTML = '';
-      gerarPdfBtn.disabled = false;
-      gerarPdfBtn.textContent = 'Gerar PDF';
-    }
-  });
-});
+      const valorAVista = (valorTotal * (1 - PIX_DISCOUNT_RATE)).toFixed(2);
+      const valorCartao = (valorTotal * (1 + CARD_MARKUP_RATE)).toFixed(2);
+      const today = new Date().toLocaleDateString('pt-BR');
 
-    document.addEventListener('DOMContentLoaded', () => {
+	  
+	  
+	  
+	  
+	  document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('orcamentoForm');
       const gerarPdfBtn = document.getElementById('gerarPdfBtn');
       const pdfTemplateElement = document.getElementById('pdf-template');
