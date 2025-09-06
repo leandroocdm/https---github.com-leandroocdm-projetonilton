@@ -178,41 +178,59 @@
             </html>
           `;
 
-          // 1. Renderizar o elemento HTML em um canvas
-          const canvas = await html2canvas(pdfTemplateElement, { scale: 2 }); 
-          const imgData = canvas.toDataURL('image/jpeg', 1.0);
-          
-          // 2. Criar um documento jsPDF
-          const pdf = new jsPDF('p', 'mm', 'a4');
-          const imgWidth = 210; 
-          const pageHeight = 297; 
-          const imgHeight = canvas.height * imgWidth / canvas.width;
-          let heightLeft = imgHeight;
-          let position = 0;
+ // Define a margem desejada em milímetros
+          const MARGIN = 5; 
 
-          // 3. Adicionar a imagem do canvas ao PDF
-          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
+          // Largura da página A4 em mm
+          const A4_WIDTH_MM = 210;
+          const A4_HEIGHT_MM = 297;
 
-          // Se o conteúdo for maior que uma página, adicione novas páginas
-          while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+          // Largura máxima disponível para o conteúdo da imagem (descontando as margens)
+          const contentWidthMm = A4_WIDTH_MM - (2 * MARGIN);
+          const contentHeightMm = A4_HEIGHT_MM - (2 * MARGIN);
+
+          // Renderiza o elemento HTML em um canvas
+          // Usamos uma escala alta para garantir a qualidade da imagem
+          const canvas = await html2canvas(pdfTemplateElement, { scale: 3 }); // Escala 3 para alta qualidade
+          const imgData = canvas.toDataURL('image/jpeg', 1.0); // Qualidade JPEG 1.0
+
+          // Calcula a proporção da imagem do canvas
+          const imgAspectRatio = canvas.width / canvas.height;
+
+          // Calcula a altura da imagem que caberia na largura disponível
+          let imgHeightCalculated = contentWidthMm / imgAspectRatio;
+          let imgWidthCalculated = contentWidthMm;
+
+          // Se a altura calculada for maior que a altura disponível, ajusta a altura
+          if (imgHeightCalculated > contentHeightMm) {
+              imgHeightCalculated = contentHeightMm;
+              imgWidthCalculated = contentHeightMm * imgAspectRatio;
           }
 
-          // 4. Salvar o documento
+          // Cria o documento jsPDF com orientação retrato e unidades em mm
+          const pdf = new jsPDF('p', 'mm', 'a4');
+
+          // Adiciona a imagem ao PDF, centralizando-a horizontalmente
+          const xPos = MARGIN + (contentWidthMm - imgWidthCalculated) / 2;
+          const yPos = MARGIN ;
+          
+          pdf.addImage(imgData, 'JPEG', xPos, yPos, imgWidthCalculated, imgHeightCalculated);
+          
+          // Salva o documento
           pdf.save('Orçamento.pdf');
 
           alert('PDF gerado com sucesso!');
+
         } catch (error) {
           alert('Erro ao gerar o PDF: ' + error.message);
           console.error('Erro ao gerar o PDF:', error);
         } finally {
+          // Limpa o conteúdo do template após a geração
+          pdfTemplateElement.innerHTML = '';
           gerarPdfBtn.disabled = false;
           gerarPdfBtn.textContent = 'Gerar PDF';
         }
+
       });
     });
   </script>
