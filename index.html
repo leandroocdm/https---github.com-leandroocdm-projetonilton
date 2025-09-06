@@ -222,12 +222,12 @@
             // É preciso ajustar as coordenadas (x, y, largura, altura) conforme o layout final
             const iconWidthMm = 20; // Aproximadamente 20mm para os ícones
             const iconHeightMm = 20;
-            const yIconsMm = yPos + 35; // Posição vertical dos ícones no PDF
+            const yIconsMm = yPos + 20; // Posição vertical dos ícones no PDF
             
             // Posição aproximada do WhatsApp (ajuste se necessário)
             const xWhatsappMm = xPos + imgWidthCalculated - (iconWidthMm * 2) - 10;
             // Posição aproximada do Instagram (ajuste se necessário)
-            const xInstagramMm = xPos + imgWidthCalculated - iconWidthMm - 5; 
+            const xInstagramMm = xPos + imgWidthCalculated - iconWidthMm; 
 
             pdf.link(xWhatsappMm, yIconsMm, iconWidthMm, iconHeightMm, { url: 'https://wa.me/5519983161919' });
             pdf.link(xInstagramMm, yIconsMm, iconWidthMm, iconHeightMm, { url: 'https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y=' });
