@@ -101,7 +101,9 @@ function validarCNPJ(cnpj) {
 
 
 // Validação simples no envio
-document.querySelector("form")?.addEventListener("submit", function(e) {
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
   const valor = document.getElementById("cpfCnpjCliente").value;
   const somenteNumeros = valor.replace(/\D/g, '');
 
@@ -113,11 +115,16 @@ document.querySelector("form")?.addEventListener("submit", function(e) {
   }
 
   if (!valido) {
-    e.preventDefault();
     alert("CPF ou CNPJ inválido. Corrija antes de gerar o PDF.");
-    return;
+    return; // <-- para aqui, não gera o PDF
   }
-});
+
+  // daqui pra baixo é só geração do PDF
+  gerarPdfBtn.disabled = true;
+  gerarPdfBtn.textContent = 'Gerando PDF...';
+
+  try {
+    const { jsPDF } = window.jspdf;
 
 
 
