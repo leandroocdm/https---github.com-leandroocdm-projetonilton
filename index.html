@@ -156,7 +156,7 @@
                         valido = validarCNPJ(valor);
                         cpfCnpjFormatado = formatarCNPJ(somenteNumeros);
                     } else {
-                        valido = false; // Se o número de dígitos não for 11 ou 14, é inválido.
+                        valido = false;
                     }
 
                     if (!valido) {
@@ -283,7 +283,6 @@
                         </body>
                     `;
 
-                    // renderiza o PDF
                     const MARGIN = 5;
                     const A4_WIDTH_MM = 210;
                     const A4_HEIGHT_MM = 297;
@@ -308,7 +307,6 @@
 
                     pdf.addImage(imgData, 'JPEG', xPos, yPos, imgWidthCalculated, imgHeightCalculated);
 
-                    // Links clicáveis
                     pdf.link(xPos + imgWidthCalculated - 48, yPos + 20, 20, 20, { url: 'https://wa.me/5519983161919' });
                     pdf.link(xPos + imgWidthCalculated - 24, yPos + 20, 20, 20, { url: 'https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y=' });
 
