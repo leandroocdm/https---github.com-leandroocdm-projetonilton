@@ -34,6 +34,15 @@ button {
 button:hover { background-color: #218838; }
 
 .cpf-cnpj-selection {
-  display:flex;
-  
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente o grupo de itens */
+    align-items: center; /* Centraliza verticalmente os itens */
+    padding-bottom: 50px;
+    width: 100%;
+    /* text-align: center; removido pois justify-content cuida do alinhamento horizontal */
+}
+
+.cpf-cnpj-selection label {
+    margin: 0 15px; /* Adiciona 15px de margem à esquerda e à direita de cada label */
+    white-space: nowrap; /* Evita que o texto quebre em várias linhas */
 }
