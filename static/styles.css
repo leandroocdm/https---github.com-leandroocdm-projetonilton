@@ -43,6 +43,7 @@ button:hover { background-color: #218838; }
 }
 
 .cpf-cnpj-selection label {
-    margin: 0 15px; /* Adiciona 15px de margem à esquerda e à direita de cada label */
+    margin: 0 15px;
+  text-align: center;/* Adiciona 15px de margem à esquerda e à direita de cada label */
 }
 
