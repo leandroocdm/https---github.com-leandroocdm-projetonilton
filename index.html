@@ -26,7 +26,7 @@
                         <input type="radio" name="docType" value="cpfCnpj" checked> CPF/CNPJ
                     </label>
                     <label>
-                        <input type="radio" name="docType" value="na"> Não se aplica (N/A)
+                        <input type="radio" name="docType" value="na"> Não informar
                     </label>
                 </div>
                 
@@ -264,7 +264,7 @@
                                 <div class="payment-option">
                                     <div class="payment-title">À Vista</div>
                                     <div class="payment-desc">• Com desconto incluso</div>
-                                    <div class="payment-value"><strong>R$ ${valorAVista}</strong></div>
+                                    <div class="payment-value"><strong>R$ ${valorTotal}</strong></div>
                                 </div>
                                 <div class="payment-option">
                                     <div class="payment-title">Entrada+Restante</div>
@@ -308,7 +308,7 @@
                     pdf.addImage(imgData, 'JPEG', xPos, yPos, imgWidthCalculated, imgHeightCalculated);
 
                     pdf.link(xPos + imgWidthCalculated - 48, yPos + 20, 20, 20, { url: 'https://wa.me/5519983161919' });
-                    pdf.link(xPos + imgWidthCalculated - 24, yPos + 20, 20, 20, { url: 'https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y=' });
+                    pdf.link(xPos + imgWidthCalculated - 12, yPos + 20, 20, 20, { url: 'https://instagram.com/moveis_planejados_nascimento?igshid=YmMyMTA2M2Y=' });
 
                     pdf.save('Orçamento.pdf');
                     alert('PDF gerado com sucesso!');
