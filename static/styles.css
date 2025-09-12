@@ -46,3 +46,15 @@ button:hover { background-color: #218838; }
     margin: 0 15px; /* Adiciona 15px de margem à esquerda e à direita de cada label */
     white-space: nowrap; /* Evita que o texto quebre em várias linhas */
 }
+
+/* Opcional: Para o campo de input de CPF/CNPJ, se ele também precisar de centralização */
+#cpfCnpjInputContainer {
+    text-align: center; /* Centraliza o texto e o input dentro do container */
+}
+
+#cpfCnpjInputContainer label,
+#cpfCnpjInputContainer input {
+    margin: 0 auto; /* Tenta centralizar elementos block ou inline-block */
+    display: block; /* Garante que label e input se comportem como blocos para 'margin: auto' */
+    width: fit-content; /* Ajusta a largura ao conteúdo para que 'margin: auto' funcione */
+}
