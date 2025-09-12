@@ -32,3 +32,8 @@ button {
   cursor: pointer;
 }
 button:hover { background-color: #218838; }
+
+.cpf-cnpj-selection {
+  display:flex;
+  
+}
